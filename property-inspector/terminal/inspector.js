@@ -1,0 +1,87 @@
+let actionSetting = {
+  title: "Run",
+  command: "",
+  macTerminal: "iterm2",
+  timeoutMs: 30000,
+  autoCloseTerminal: "off",
+  closeDelayMs: 1200,
+};
+
+let form = null;
+
+$UD.connect("com.ulanzi.ulanzideck.terminalrunner.run");
+
+$UD.onConnected(() => {
+  form = document.querySelector("#property-inspector");
+  const wrapper = document.querySelector("#wrapper");
+
+  if (!form || !wrapper) {
+    return;
+  }
+
+  wrapper.classList.remove("hidden");
+
+  form.addEventListener(
+    "input",
+    Utils.debounce(() => {
+      const next = normalizeSettings(Utils.getFormValue(form));
+      actionSetting = next;
+      $UD.sendParamFromPlugin(actionSetting);
+    }, 120)
+  );
+});
+
+$UD.onAdd((jsonObj) => {
+  if (jsonObj && jsonObj.param) {
+    applySettings(jsonObj.param);
+  }
+});
+
+$UD.onParamFromApp((jsonObj) => {
+  if (jsonObj && jsonObj.param) {
+    applySettings(jsonObj.param);
+  }
+});
+
+$UD.onParamFromPlugin((jsonObj) => {
+  if (jsonObj && jsonObj.param) {
+    applySettings(jsonObj.param);
+  }
+});
+
+$UD.onDidReceiveSettings((jsonObj) => {
+  if (jsonObj && jsonObj.settings) {
+    applySettings(jsonObj.settings);
+  }
+});
+
+function applySettings(params) {
+  actionSetting = normalizeSettings(params || {});
+
+  if (!form) {
+    return;
+  }
+
+  Utils.setFormValue(actionSetting, form);
+}
+
+function normalizeSettings(raw) {
+  const input = raw && typeof raw === "object" ? raw : {};
+  const timeoutMs = Number(input.timeoutMs);
+  const closeDelayMs = Number(input.closeDelayMs);
+
+  return {
+    title: typeof input.title === "string" && input.title.trim() ? input.title : "Run",
+    command: typeof input.command === "string" ? input.command : "",
+    macTerminal: input.macTerminal === "terminal" ? "terminal" : "iterm2",
+    timeoutMs:
+      Number.isFinite(timeoutMs) && timeoutMs >= 1000 && timeoutMs <= 300000
+        ? Math.floor(timeoutMs)
+        : 30000,
+    autoCloseTerminal: input.autoCloseTerminal === "on" ? "on" : "off",
+    closeDelayMs:
+      Number.isFinite(closeDelayMs) && closeDelayMs >= 0 && closeDelayMs <= 30000
+        ? Math.floor(closeDelayMs)
+        : 1200,
+  };
+}

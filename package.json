@@ -1,0 +1,13 @@
+{
+  "name": "ulanzi-terminal-runner-plugin",
+  "version": "1.0.0",
+  "description": "Ulanzi Deck plugin to run shell commands per key",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "check": "node --check index.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

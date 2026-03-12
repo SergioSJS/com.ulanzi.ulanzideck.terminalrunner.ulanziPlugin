@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover"
+  />
+  <title>Terminal Runner Settings</title>
+  <link rel="stylesheet" href="../../libs/css/udpi.css">
+  <style>
+    #property-inspector .udpi-item-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .terminal-command-row {
+      display: block;
+      max-width: 100%;
+      margin-top: 8px;
+    }
+
+    .terminal-command-row .udpi-item-label {
+      width: 100%;
+      text-align: left;
+      padding-right: 0;
+      margin-bottom: 4px;
+      overflow: visible;
+      text-overflow: clip;
+    }
+
+    .terminal-command-row .udpi-item-label:after {
+      content: "";
+    }
+
+    .terminal-command-row .udpi-item-value {
+      width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+      box-sizing: border-box;
+    }
+
+    .terminal-help {
+      font-size: 11px;
+      opacity: 0.85;
+      line-height: 1.4;
+      margin-top: 8px;
+    }
+
+    .terminal-textarea {
+      min-height: 220px;
+      height: 220px;
+      resize: vertical;
+    }
+  </style>
+</head>
+<body>
+  <div class="udpi-wrapper hidden" id="wrapper">
+    <form id="property-inspector">
+      <div class="udpi-item">
+        <div class="udpi-item-label">Label</div>
+        <input
+          class="udpi-item-value"
+          type="text"
+          name="title"
+          maxlength="24"
+          placeholder="Run"
+        />
+      </div>
+
+      <div class="udpi-item">
+        <div class="udpi-item-label">macOS Terminal</div>
+        <select class="udpi-item-value select" name="macTerminal">
+          <option value="iterm2">iTerm2 (fallback auto)</option>
+          <option value="terminal">Terminal.app</option>
+        </select>
+      </div>
+
+      <div class="udpi-item">
+        <div class="udpi-item-label">Timeout (ms)</div>
+        <input
+          class="udpi-item-value"
+          type="number"
+          name="timeoutMs"
+          min="1000"
+          max="300000"
+          step="500"
+          value="30000"
+        />
+      </div>
+
+      <div class="udpi-item">
+        <div class="udpi-item-label">Auto-Close (macOS)</div>
+        <select class="udpi-item-value select" name="autoCloseTerminal">
+          <option value="off">No</option>
+          <option value="on">Yes</option>
+        </select>
+      </div>
+
+      <div class="udpi-item">
+        <div class="udpi-item-label">Close Delay (ms)</div>
+        <input
+          class="udpi-item-value"
+          type="number"
+          name="closeDelayMs"
+          min="0"
+          max="30000"
+          step="100"
+          value="1200"
+        />
+      </div>
+
+      <div class="udpi-item terminal-command-row">
+        <div class="udpi-item-label">Command</div>
+        <textarea
+          class="udpi-item-value terminal-textarea"
+          name="command"
+          placeholder="cd ~/project\ncode ."
+        ></textarea>
+      </div>
+
+      <div class="terminal-help">
+        Commands run as a single script, preserving directory and variables between lines.
+        If auto-close is enabled, plugin sends <code>sleep + exit</code> after command completion.
+      </div>
+    </form>
+  </div>
+
+  <script src="../../libs/js/constants.js"></script>
+  <script src="../../libs/js/eventEmitter.js"></script>
+  <script src="../../libs/js/timers.js"></script>
+  <script src="../../libs/js/utils.js"></script>
+  <script src="../../libs/js/ulanzideckApi.js"></script>
+  <script src="./inspector.js"></script>
+</body>
+</html>

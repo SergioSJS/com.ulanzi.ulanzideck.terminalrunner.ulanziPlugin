@@ -1,0 +1,52 @@
+{
+  "Version": "1.0.0",
+  "Author": "Sergio Sousa",
+  "Name": "Terminal Runner",
+  "Description": "Run shell commands from Ulanzi Deck keys",
+  "Icon": "assets/icons/plugin.svg",
+  "UUID": "com.ulanzi.ulanzideck.terminalrunner",
+  "Category": "Automation",
+  "CategoryIcon": "assets/icons/category.svg",
+  "CodePath": "index.js",
+  "Type": "JavaScript",
+  "PrivateAPI": true,
+  "SupportedInMultiActions": false,
+  "Actions": [
+    {
+      "Name": "Run Terminal Command",
+      "Tooltip": "Execute configured shell command",
+      "Icon": "assets/icons/action.svg",
+      "UUID": "com.ulanzi.ulanzideck.terminalrunner.run",
+      "PropertyInspectorPath": "property-inspector/terminal/inspector.html",
+      "state": 0,
+      "States": [
+        {
+          "Name": "Idle",
+          "Image": "assets/icons/state-idle.svg"
+        },
+        {
+          "Name": "Running",
+          "Image": "assets/icons/state-running.svg"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "Controllers": [
+        "Keypad"
+      ],
+      "Devices": []
+    }
+  ],
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.11"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Software": {
+    "MinVersion": "2.1.0"
+  }
+}
