@@ -43,6 +43,8 @@ The script installs this plugin folder to:
 
 `~/Library/Application Support/Ulanzi/UlanziDeck/Plugins/com.ulanzi.ulanzideck.terminalrunner.ulanziPlugin`
 
+It also runs `npm ci --omit=dev` to ensure `node_modules` (including `ws`) are bundled.
+
 Then reload plugins or restart Ulanzi Deck.
 
 ## Install (Manual)

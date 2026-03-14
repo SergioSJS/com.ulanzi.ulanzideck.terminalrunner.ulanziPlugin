@@ -8,6 +8,8 @@ let actionSetting = {
 };
 
 let form = null;
+const SAVE_DEBOUNCE_MS = 120;
+const SETTINGS_CMD = "setSettings";
 
 $UD.connect("com.ulanzi.ulanzideck.terminalrunner.run");
 
@@ -21,14 +23,16 @@ $UD.onConnected(() => {
 
   wrapper.classList.remove("hidden");
 
-  form.addEventListener(
-    "input",
-    Utils.debounce(() => {
-      const next = normalizeSettings(Utils.getFormValue(form));
-      actionSetting = next;
-      $UD.sendParamFromPlugin(actionSetting);
-    }, 120)
-  );
+  const syncSettingsDebounced = Utils.debounce(syncSettings, SAVE_DEBOUNCE_MS);
+
+  form.addEventListener("input", syncSettingsDebounced);
+  form.addEventListener("change", syncSettings);
+  window.addEventListener("beforeunload", syncSettings);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      syncSettings();
+    }
+  });
 });
 
 $UD.onAdd((jsonObj) => {
@@ -84,4 +88,24 @@ function normalizeSettings(raw) {
         ? Math.floor(closeDelayMs)
         : 1200,
   };
+}
+
+function syncSettings() {
+  if (!form) {
+    return;
+  }
+
+  const next = normalizeSettings(Utils.getFormValue(form));
+  actionSetting = next;
+
+  $UD.sendParamFromPlugin(actionSetting);
+  sendSetSettingsFallback(actionSetting);
+}
+
+function sendSetSettingsFallback(settings) {
+  if (typeof $UD.send !== "function") {
+    return;
+  }
+
+  $UD.send(SETTINGS_CMD, { settings });
 }

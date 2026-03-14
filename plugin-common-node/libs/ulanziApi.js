@@ -1,9 +1,26 @@
-import WebSocket from "ws";
 import EventEmitter from "events";
 import { promises as fs } from "fs";
+import { createRequire } from "module";
 
 import { Events, SocketErrors } from "./constants.js";
 import Utils from "./utils.js";
+
+const require = createRequire(import.meta.url);
+
+function resolveWebSocketClient() {
+  if (typeof globalThis.WebSocket === "function") {
+    return globalThis.WebSocket;
+  }
+
+  try {
+    const wsModule = require("ws");
+    return wsModule.WebSocket || wsModule.default || wsModule;
+  } catch {
+    return null;
+  }
+}
+
+const WebSocketClient = resolveWebSocketClient();
 
 export default class UlanziApi extends EventEmitter {
   constructor() {
@@ -38,7 +55,15 @@ export default class UlanziApi extends EventEmitter {
     //判断是否为主服务,约定主服务 uuid 为4位，action应大于4位
     const isMain = this.uuid.split(".").length == 4;
 
-    this.websocket = new WebSocket(`ws://${this.address}:${this.port}`);
+    if (!WebSocketClient) {
+      const error =
+        "[ULANZIDECK] Missing WebSocket client. Install dependencies with npm ci --omit=dev.";
+      Utils.error(error);
+      this.emit(Events.ERROR, error);
+      return;
+    }
+
+    this.websocket = new WebSocketClient(`ws://${this.address}:${this.port}`);
 
     this.websocket.onopen = () => {
       Utils.log(`[ULANZIDECK] MAIN WEBSOCKET OPEN: ${this.uuid}`);
@@ -181,6 +206,7 @@ export default class UlanziApi extends EventEmitter {
    * @param {object} params
    */
   send(cmd, params) {
+    const openState = WebSocketClient ? WebSocketClient.OPEN : 1;
     console.warn(`[ULANZIDECK] send:  ${JSON.stringify({
           cmd,
           uuid: this.uuid,
@@ -188,7 +214,7 @@ export default class UlanziApi extends EventEmitter {
           actionid: this.actionid,
           ...params,
         })}`);
-    this.websocket && this.websocket.readyState === WebSocket.OPEN &&
+    this.websocket && this.websocket.readyState === openState &&
       this.websocket.send(
         JSON.stringify({
           cmd,
@@ -868,5 +894,4 @@ export default class UlanziApi extends EventEmitter {
     return this;
   }
 }
-
 

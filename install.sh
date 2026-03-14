@@ -17,6 +17,14 @@ fi
 
 mkdir -p "$TARGET_BASE"
 rm -rf "$TARGET_DIR"
+
+if command -v npm >/dev/null 2>&1; then
+  echo "Installing production dependencies..."
+  npm ci --omit=dev
+else
+  echo "Warning: npm not found. Ensure node_modules is bundled before install."
+fi
+
 cp -R "$SOURCE_DIR" "$TARGET_DIR"
 
 echo "Installed plugin to: $TARGET_DIR"
