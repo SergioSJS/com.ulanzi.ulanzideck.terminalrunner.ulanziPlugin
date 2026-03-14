@@ -280,6 +280,7 @@ function formatSleepSeconds(delayMs) {
 }
 
 async function runOnWindows(scriptPath, timeoutMs) {
+  const normalizedTimeout = normalizeTimeout(timeoutMs);
   const psArgs = [
     "-NoProfile",
     "-ExecutionPolicy",
@@ -289,14 +290,23 @@ async function runOnWindows(scriptPath, timeoutMs) {
   ];
 
   try {
-    await runSpawn("powershell.exe", psArgs, timeoutMs);
+    await runSpawn("powershell.exe", psArgs, normalizedTimeout);
     return;
-  } catch {
+  } catch (error) {
+    if (!isMissingExecutableError(error)) {
+      throw error;
+    }
+
+    $UD.logMessage("powershell.exe unavailable, falling back to cmd.exe", "warning");
     const cmdScriptPath = scriptPath.replace(/\.ps1$/i, ".cmd");
     const psBody = await fs.readFile(scriptPath, "utf8");
     await fs.writeFile(cmdScriptPath, `@echo off\r\n${psBody}\r\n`, "utf8");
-    await runSpawn("cmd.exe", ["/c", cmdScriptPath], timeoutMs);
+    await runSpawn("cmd.exe", ["/c", cmdScriptPath], normalizedTimeout);
   }
+}
+
+function isMissingExecutableError(error) {
+  return Boolean(error && typeof error === "object" && error.code === "ENOENT");
 }
 
 function runSpawn(command, args, timeoutMs) {
